@@ -1,21 +1,41 @@
-# GROUP-7
-A Peer Mentorship System:
-The platform promotes self-improvement, leadership, and collaboration while reducing the barriers to finding academic and personal support within the student community. 
-Its peer-to-peer design ensures scalability, flexibility, and privacy by enabling direct communication between users.
+# 🌟 GROUP-7: Peer Mentorship System
 
-✨ Key Features
+A platform connecting students for academic and personal growth through peer-to-peer mentorship. Promotes self-improvement, leadership, and collaboration while enabling direct, private communication.
 
-User registration and profile creation
+---
 
-Mentor/mentee role selection
+## ✨ Key Features
+- 📝 **User Registration & Profile Creation**  
+- 🎓 **Mentor/Mentee Role Selection**  
+- 🔍 **Peer Discovery & Intelligent Matching**  
+- 💬 **Secure One-on-One Chat & File Sharing**  
+- 📅 **Session Scheduling & Reminders**  
+- ⭐ **Rating & Feedback System**  
+- 📱 **Simple, Responsive Interface**  
 
-Peer discovery and intelligent matching
+---
 
-Secure one-on-one chat and file sharing
+## 🛠 Technologies
+- 🌐 Frontend: HTML, CSS, JavaScript / React  
+- ⚙️ Backend: Node.js / Python / Django  
+- 💾 Database: MySQL / MongoDB / PostgreSQL  
+- 🔒 Authentication: Secure login & role-based access  
+- 🔔 Notifications: Email or in-app reminders  
 
-Session scheduling and reminders
+---
 
-Rating and feedback system
+## 🚀 Getting Started
+1. Clone the repo:  
+   `git clone https://github.com/HaileBOT/GROUP-7.git`  
+2. Install dependencies:  
+   `npm install` (Node.js)
+3. Configure `.env` for database & auth settings  
+4. Run the app:  
+   `npm start` (Node.js)  
+5. Open `http://localhost:3000` 
 
-Simple, responsive interface
+---
 
+🤝 Contributing
+
+Want to help? Fork the repo, make your changes, and send a PR.
