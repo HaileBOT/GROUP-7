@@ -26,10 +26,10 @@ A platform connecting students for academic and personal growth through peer-to-
 
 ## 🚀 Getting Started
 1. Clone the repo:  
-   `git clone https://github.com/yourusername/group-7-peer-mentorship.git`  
+   `git clone https://github.com/HaileBOT/GROUP-7.git`  
 2. Install dependencies:  
    `npm install` (Node.js)
 3. Configure `.env` for database & auth settings  
 4. Run the app:  
    `npm start` (Node.js)
-5. Open `http://localhost:3000` (or your port) in browser 
+5. Open `http://localhost:3000` 
