@@ -28,8 +28,14 @@ A platform connecting students for academic and personal growth through peer-to-
 1. Clone the repo:  
    `git clone https://github.com/HaileBOT/GROUP-7.git`  
 2. Install dependencies:  
-   `npm install` (Node.js) or `pip install -r requirements.txt` (Python/Django)  
+   `npm install` (Node.js)
 3. Configure `.env` for database & auth settings  
 4. Run the app:  
-   `npm start` (Node.js) or `python manage.py runserver` (Django)  
-5. Open `http://localhost:3000` (or your port) in browser  
+   `npm start` (Node.js)  
+5. Open `http://localhost:3000` 
+
+---
+
+🤝 Contributing
+
+Want to help? Fork the repo, make your changes, and send a PR.
