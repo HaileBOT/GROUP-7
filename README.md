@@ -17,9 +17,19 @@ A platform connecting students for academic and personal growth through peer-to-
 
 ## 🛠 Technologies
 - 🌐 Frontend: HTML, CSS, JavaScript / React  
-- ⚙️ Backend: Node.js / Python / Django  
-- 💾 Database: MySQL / MongoDB / PostgreSQL  
+- ⚙️ Backend: Node.js 
+- 💾 Database: PostgreSQL  
 - 🔒 Authentication: Secure login & role-based access  
-- 🔔 Notifications: Email or in-app reminders  
+- 🔔 Notifications: in-app reminders  
 
 ---
+
+## 🚀 Getting Started
+1. Clone the repo:  
+   `git clone https://github.com/yourusername/group-7-peer-mentorship.git`  
+2. Install dependencies:  
+   `npm install` (Node.js)
+3. Configure `.env` for database & auth settings  
+4. Run the app:  
+   `npm start` (Node.js)
+5. Open `http://localhost:3000` (or your port) in browser 
