@@ -32,4 +32,9 @@ A platform connecting students for academic and personal growth through peer-to-
 3. Configure `.env` for database & auth settings  
 4. Run the app:  
    `npm start` (Node.js)
-5. Open `http://localhost:3000` 
+5. Open `http://localhost:3000`
+---
+
+🤝 Contributing
+
+Want to help? Fork the repo, make your changes, and send a PR.
