@@ -23,3 +23,13 @@ A platform connecting students for academic and personal growth through peer-to-
 - 🔔 Notifications: Email or in-app reminders  
 
 ---
+
+## 🚀 Getting Started
+1. Clone the repo:  
+   `git clone https://github.com/HaileBOT/GROUP-7.git`  
+2. Install dependencies:  
+   `npm install` (Node.js) or `pip install -r requirements.txt` (Python/Django)  
+3. Configure `.env` for database & auth settings  
+4. Run the app:  
+   `npm start` (Node.js) or `python manage.py runserver` (Django)  
+5. Open `http://localhost:3000` (or your port) in browser  
