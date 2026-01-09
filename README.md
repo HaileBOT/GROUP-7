@@ -27,8 +27,31 @@ A platform connecting students for academic and personal growth through peer-to-
 ## 🚀 Getting Started
 1. Clone the repo:  
    `git clone https://github.com/HaileBOT/GROUP-7.git`  
-2. Install dependencies:  
-   `npm install` (Node.js)
+2. Local Development Setup
+
+     
+
+     Step 1: Install Root Dependencies
+
+      ```bash
+      npm install
+      ```
+
+    Step 2: Install Backend Dependencies
+
+      ```bash
+      cd backend
+      npm install
+      cd ..
+      ```
+
+   Step 3: Install Frontend Dependencies
+
+      ```bash
+      cd frontend
+      npm install
+      cd ..
+      ```
 3. Configure `.env` for database & auth settings  
 4. Run the app:  
    `npm start` (Node.js)  
