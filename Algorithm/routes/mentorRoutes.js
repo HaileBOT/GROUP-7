@@ -9,20 +9,23 @@ router.post('/mentors', authenticateToken, async (req, res) => {
   try {
     const { tags, courseId } = req.body;
 
-    if (!tags || !Array.isArray(tags) || tags.length === 0) {
-      return res.status(400).json({ error: 'Tags are required for mentor matching' });
+    // If courseId is provided, prioritize mentors who teach that course
+    let whereClause = "WHERE u.role = 'mentor' AND u.approved = true";
+    let params = [];
+    
+    if (courseId) {
+      whereClause += ` AND (u.profile->'courses')::jsonb ? $1`;
+      params.push(courseId);
     }
 
-    // Find mentors with matching skills
     const mentors = await query(`
       SELECT 
         u.id,
         u.first_name,
         u.last_name,
         u.email,
-        u.skills,
-        u.bio,
         u.profile,
+        u.bio,
         u.created_at,
         COALESCE(AVG(r.rating), 0) as average_rating,
         COUNT(r.id) as total_ratings,
@@ -30,45 +33,23 @@ router.post('/mentors', authenticateToken, async (req, res) => {
       FROM users u
       LEFT JOIN ratings r ON u.id = r.mentor_id
       LEFT JOIN sessions s ON u.id = s.mentor_id AND s.status = 'completed'
-      WHERE u.role = 'mentor' 
-        AND u.approved = true
-        AND (
-          u.skills && $1::text[] OR  -- Skills overlap with tags
-          EXISTS (
-            SELECT 1 FROM sessions s2 
-            JOIN questions q ON s2.course_id = q.course_id 
-            WHERE s2.mentor_id = u.id 
-              AND q.tags && $1::text[]
-          )
-        )
-      GROUP BY u.id, u.first_name, u.last_name, u.email, u.skills, u.bio, u.profile, u.created_at
-      ORDER BY 
-        -- Prioritize by skill match count
-        (SELECT COUNT(*) FROM unnest(u.skills) skill WHERE skill = ANY($1::text[])) DESC,
-        average_rating DESC,
-        total_sessions DESC
+      ${whereClause}
+      GROUP BY u.id, u.first_name, u.last_name, u.email, u.profile, u.bio, u.created_at
+      ORDER BY average_rating DESC, total_sessions DESC
       LIMIT 10
-    `, [tags]);
+    `, params);
 
-    // Calculate match scores
-    const mentorsWithScores = mentors.map(mentor => {
-      const skillMatches = mentor.skills ? mentor.skills.filter(skill => tags.includes(skill)).length : 0;
-      const matchScore = Math.min(100, (skillMatches / tags.length) * 100);
-      
-      return {
-        ...mentor,
-        matchScore: Math.round(matchScore),
-        skillMatches: skillMatches,
-        averageRating: parseFloat(mentor.average_rating) || 0,
-        totalRatings: parseInt(mentor.total_ratings) || 0,
-        totalSessions: parseInt(mentor.total_sessions) || 0
-      };
-    });
+    const mentorsFormatted = mentors.map(mentor => ({
+      ...mentor,
+      averageRating: parseFloat(mentor.average_rating) || 0,
+      totalRatings: parseInt(mentor.total_ratings) || 0,
+      totalSessions: parseInt(mentor.total_sessions) || 0
+    }));
 
     res.json({
-      mentors: mentorsWithScores,
-      matchingTags: tags,
-      totalFound: mentorsWithScores.length
+      mentors: mentorsFormatted,
+      matchingTags: tags || [],
+      totalFound: mentorsFormatted.length
     });
 
   } catch (error) {
@@ -83,16 +64,16 @@ router.post('/mentors', authenticateToken, async (req, res) => {
 // Get all available mentors (for general browsing)
 router.get('/mentors/all', async (req, res) => {
   try {
-    const { skills, sortBy = 'rating', limit = 20, offset = 0 } = req.query;
+    const { courses, sortBy = 'rating', limit = 20, offset = 0 } = req.query;
 
     let whereClause = 'WHERE u.role = \'mentor\' AND u.approved = true';
     let params = [];
 
-    // Filter by skills if provided
-    if (skills) {
-      const skillsArray = Array.isArray(skills) ? skills : skills.split(',');
-      whereClause += ' AND u.skills && $1::text[]';
-      params.push(skillsArray);
+    // Filter by courses if provided
+    if (courses) {
+      const coursesArray = Array.isArray(courses) ? courses : courses.split(',');
+      whereClause += ` AND (u.profile->'courses')::jsonb ?| $${params.length + 1}`;
+      params.push(coursesArray);
     }
 
     // Determine sort order
@@ -111,9 +92,8 @@ router.get('/mentors/all', async (req, res) => {
         u.first_name,
         u.last_name,
         u.email,
-        u.skills,
-        u.bio,
         u.profile,
+        u.bio,
         u.created_at,
         COALESCE(AVG(r.rating), 0) as average_rating,
         COUNT(r.id) as total_ratings,
@@ -123,7 +103,7 @@ router.get('/mentors/all', async (req, res) => {
       LEFT JOIN ratings r ON u.id = r.mentor_id
       LEFT JOIN sessions s ON u.id = s.mentor_id AND s.status IN ('completed', 'active')
       ${whereClause}
-      GROUP BY u.id, u.first_name, u.last_name, u.email, u.skills, u.bio, u.profile, u.created_at
+      GROUP BY u.id, u.first_name, u.last_name, u.email, u.profile, u.bio, u.created_at
       ORDER BY ${orderBy}
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
     `, [...params, parseInt(limit), parseInt(offset)]);
@@ -141,7 +121,7 @@ router.get('/mentors/all', async (req, res) => {
       totalRatings: parseInt(mentor.total_ratings) || 0,
       totalSessions: parseInt(mentor.total_sessions) || 0,
       activeSessions: parseInt(mentor.active_sessions) || 0,
-      isAvailable: parseInt(mentor.active_sessions) < 3 // Limit concurrent sessions
+      isAvailable: parseInt(mentor.active_sessions) < 3
     }));
 
     res.json({
@@ -174,10 +154,8 @@ router.get('/mentors/:id', async (req, res) => {
         u.first_name,
         u.last_name,
         u.email,
-        u.skills,
-        u.bio,
         u.profile,
-        u.availability,
+        u.bio,
         u.created_at,
         COALESCE(AVG(r.rating), 0) as average_rating,
         COUNT(r.id) as total_ratings,
@@ -187,7 +165,7 @@ router.get('/mentors/:id', async (req, res) => {
       LEFT JOIN ratings r ON u.id = r.mentor_id
       LEFT JOIN sessions s ON u.id = s.mentor_id AND s.status IN ('completed', 'active')
       WHERE u.id = $1 AND u.role = 'mentor' AND u.approved = true
-      GROUP BY u.id, u.first_name, u.last_name, u.email, u.skills, u.bio, u.profile, u.availability, u.created_at
+      GROUP BY u.id, u.first_name, u.last_name, u.email, u.profile, u.bio, u.created_at
     `, [id]);
 
     if (mentors.length === 0) {
@@ -222,52 +200,6 @@ router.get('/mentors/:id', async (req, res) => {
     console.error('Get mentor details error:', error);
     res.status(500).json({
       error: 'Failed to get mentor details',
-      message: error.message
-    });
-  }
-});
-
-// Update mentor profile (skills, bio, availability)
-router.put('/mentors/profile', authenticateToken, async (req, res) => {
-  try {
-    const { skills, bio, availability } = req.body;
-    const userId = req.user.id;
-
-    // Verify user is a mentor
-    const users = await query(
-      'SELECT role FROM users WHERE id = $1',
-      [userId]
-    );
-
-    if (users.length === 0 || users[0].role !== 'mentor') {
-      return res.status(403).json({ error: 'Only mentors can update mentor profile' });
-    }
-
-    const updatedUsers = await query(`
-      UPDATE users 
-      SET 
-        skills = COALESCE($1, skills),
-        bio = COALESCE($2, bio),
-        availability = COALESCE($3, availability),
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $4
-      RETURNING id, first_name, last_name, skills, bio, availability
-    `, [
-      skills || null,
-      bio,
-      availability ? JSON.stringify(availability) : null,
-      userId
-    ]);
-
-    res.json({
-      message: 'Mentor profile updated successfully',
-      mentor: updatedUsers[0]
-    });
-
-  } catch (error) {
-    console.error('Update mentor profile error:', error);
-    res.status(500).json({
-      error: 'Failed to update mentor profile',
       message: error.message
     });
   }
