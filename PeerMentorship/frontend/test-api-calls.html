@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Calls</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Test Mentor API Calls</h1>
+    <button onclick="testGetAllMentors()">Test Get All Mentors</button>
+    <button onclick="testMentorMatching()">Test Mentor Matching</button>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        
+        async function testGetAllMentors() {
+            try {
+                console.log('Testing get all mentors...');
+                const response = await axios.get(`${API_BASE_URL}/matching/mentors/all`);
+                console.log('Success:', response.data);
+                document.getElementById('results').innerHTML = `
+                    <h3>Get All Mentors - Success</h3>
+                    <pre>${JSON.stringify(response.data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = `
+                    <h3>Get All Mentors - Error</h3>
+                    <pre>${JSON.stringify(error.response?.data || error.message, null, 2)}</pre>
+                `;
+            }
+        }
+        
+        async function testMentorMatching() {
+            try {
+                // First login
+                console.log('Logging in...');
+                const loginResponse = await axios.post(`${API_BASE_URL}/auth/login`, {
+                    email: 'testquestion@aau.edu.et',
+                    password: 'password123'
+                });
+                
+                const token = loginResponse.data.token;
+                console.log('Login successful');
+                
+                // Then test matching
+                console.log('Testing mentor matching...');
+                const response = await axios.post(`${API_BASE_URL}/matching/mentors`, {
+                    tags: ['React', 'JavaScript']
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Success:', response.data);
+                document.getElementById('results').innerHTML = `
+                    <h3>Mentor Matching - Success</h3>
+                    <pre>${JSON.stringify(response.data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = `
+                    <h3>Mentor Matching - Error</h3>
+                    <pre>${JSON.stringify(error.response?.data || error.message, null, 2)}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
